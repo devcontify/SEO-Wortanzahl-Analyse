@@ -1,7 +1,6 @@
 """
 Moderne Web-UI für das Wortanzahl-Tool mit Streamlit.
-Verbesserte Benutzerfreundlichkeit und SEO-Optimierung.
-Mobile-optimierte Version.
+Verbesserte Benutzerfreundlichkeit und Funktionalität.
 """
 import os
 import sys
@@ -17,50 +16,14 @@ sys.path.insert(0, project_root)
 
 from src.api.drive import GoogleDriveClient
 from src.core.word_counter import WordCounter
-from src.core.seo_analyzer import SEOAnalyzer
 
-# Mobile-optimierte Konfiguration
+# Globale Konfiguration
 st.set_page_config(
-    page_title="📊 SEO Wortanzahl-Analyse",
+    page_title="📊 Wortanzahl-Analyse",
     page_icon="📄",
-    layout="wide",  # Breites Layout für bessere Responsiveness
-    initial_sidebar_state="auto"  # Dynamische Seitenleiste
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
-
-# CSS für zusätzliche mobile Optimierung
-st.markdown("""
-<style>
-/* Mobile-freundliche Schriftgrößen */
-@media (max-width: 600px) {
-    .stMarkdown, .stMetric, .stButton > button {
-        font-size: 14px !important;
-    }
-    
-    /* Kompaktere Spalten */
-    .stColumns > div {
-        padding: 0.25rem !important;
-    }
-    
-    /* Anpassung für Diagramme */
-    .stPlotlyChart {
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-}
-
-/* Verbesserte Touch-Interaktion */
-.stFileUploader > div > div > div > input[type="file"] {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Responsive Tabellen */
-.stDataFrame {
-    overflow-x: auto;
-    max-width: 100%;
-}
-</style>
-""", unsafe_allow_html=True)
 
 def cache_result(func):
     """Decorator für Caching von Analyseergebnissen"""
@@ -77,7 +40,7 @@ def cache_result(func):
 @cache_result
 def analyze_document(file_path: str) -> Dict[str, Any]:
     """
-    Analysiert ein Dokument mit erweiterten SEO-Metriken.
+    Analysiert ein Dokument mit Fortschrittsanzeige.
     
     Args:
         file_path: Pfad zur Dokumentdatei
@@ -87,20 +50,7 @@ def analyze_document(file_path: str) -> Dict[str, Any]:
     """
     with st.spinner(f"Analysiere {os.path.basename(file_path)}..."):
         try:
-            # Basisanalyse
             result = WordCounter.count_words(file_path)
-            
-            # Text extrahieren
-            import docx
-            doc = docx.Document(file_path)
-            full_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
-            
-            # SEO-Metriken hinzufügen
-            result['tf_idf'] = SEOAnalyzer.calculate_tf_idf([full_text])
-            result['keyword_density'] = SEOAnalyzer.keyword_density(full_text, ['content', 'marketing', 'seo'])
-            result['readability'] = SEOAnalyzer.readability_metrics(full_text)
-            result['semantic_analysis'] = SEOAnalyzer.semantic_analysis(full_text)
-            
             return result
         except Exception as e:
             st.error(f"Fehler bei der Analyse: {e}")
@@ -127,12 +77,12 @@ def main():
     """
     Hauptfunktion für die Streamlit-Anwendung.
     """
-    st.title("📊 SEO Wortanzahl-Analyse")
+    st.title("📊 Wortanzahl-Analyse")
     
     # Seitennavigation
     page = st.sidebar.radio(
         "Menü", 
-        ["Lokale Dateien", "Google Drive", "SEO-Insights", "Über"],
+        ["Lokale Dateien", "Google Drive", "Über"],
         index=0
     )
     
@@ -140,15 +90,12 @@ def main():
         local_file_analysis()
     elif page == "Google Drive":
         google_drive_analysis()
-    elif page == "SEO-Insights":
-        seo_insights_page()
     else:
         about_page()
 
 def local_file_analysis():
     """
     Moderne Analyse von lokalen DOCX-Dateien mit Drag & Drop.
-    Mobile-optimierte Version.
     """
     st.header("📤 Dokumente analysieren")
     
@@ -195,37 +142,9 @@ def google_drive_analysis():
     st.header("🌐 Google Drive Dokumente")
     st.warning("Google Drive Integration wird noch entwickelt.")
 
-def seo_insights_page():
-    """
-    Detaillierte SEO-Insights und Erklärungen.
-    Mobile-optimierte Version.
-    """
-    st.header("🔍 SEO-Insights")
-    
-    st.markdown("""
-    ### SEO-Metriken erklärt
-    
-    #### 1. TF-IDF 
-    - Misst Wortrelevanz im Dokument
-    - Höhere Werte = Wichtigere Schlüsselwörter
-    
-    #### 2. Keyword-Dichte
-    - Prozentsatz spezifischer Keywords
-    - Optimierung für Suchmaschinen
-    
-    #### 3. Lesbarkeit
-    - Flesch Reading Ease
-    - Textverständlichkeit
-    
-    #### 4. Semantische Analyse
-    - Identifiziert bedeutungsvolle Wörter
-    - Zeigt thematische Schwerpunkte
-    """)
-
 def display_results(results: List[Dict[str, int]]):
     """
-    Moderne Darstellung der Analyseergebnisse mit SEO-Metriken.
-    Mobile-optimierte Visualisierungen.
+    Moderne Darstellung der Analyseergebnisse mit interaktiven Visualisierungen.
     
     Args:
         results: Liste der Analyseergebnisse
@@ -244,7 +163,6 @@ def display_results(results: List[Dict[str, int]]):
     # Detaillierte Ergebnisse
     for result in results:
         with st.expander(f"📄 {result.get('file', 'Unbekannt')}"):
-            # Basis-Statistiken
             col1, col2 = st.columns(2)
             
             with col1:
@@ -252,7 +170,7 @@ def display_results(results: List[Dict[str, int]]):
                 st.metric("Einzigartige Wörter", result.get('unique_words', 0))
             
             with col2:
-                # Top 10 Wörter
+                # Interaktive Worthäufigkeitsvisualisierung
                 word_freq = result.get('word_frequency', {})
                 top_words = dict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:10])
                 
@@ -268,32 +186,6 @@ def display_results(results: List[Dict[str, int]]):
                 )
                 st.plotly_chart(fig, use_container_width=True)
             
-            # SEO-Metriken
-            st.subheader("🔍 SEO-Metriken")
-            
-            # TF-IDF
-            st.write("#### TF-IDF Top 5")
-            tf_idf = result.get('tf_idf', {})
-            tf_idf_df = pd.DataFrame.from_dict(dict(list(tf_idf.items())[:5]), orient='index', columns=['TF-IDF'])
-            st.dataframe(tf_idf_df)
-            
-            # Keyword-Dichte
-            st.write("#### Keyword-Dichte")
-            keyword_density = result.get('keyword_density', {})
-            keyword_df = pd.DataFrame.from_dict(keyword_density, orient='index', columns=['Dichte %'])
-            st.dataframe(keyword_df)
-            
-            # Lesbarkeit
-            st.write("#### Lesbarkeit")
-            readability = result.get('readability', {})
-            st.metric("Flesch Reading Ease", f"{readability.get('flesch_reading_ease', 0):.2f}")
-            st.metric("Komplexitätslevel", readability.get('complexity_level', 'Unbekannt'))
-            
-            # Semantische Analyse
-            st.write("#### Semantische Analyse")
-            semantic = result.get('semantic_analysis', {})
-            st.metric("Bedeutungsvolle Wörter", semantic.get('unique_meaningful_words', 0))
-            
             # Wortwolke
             st.subheader("Wortwolke")
             display_word_cloud(result.get('word_frequency', {}))
@@ -301,23 +193,21 @@ def display_results(results: List[Dict[str, int]]):
 def about_page():
     """
     Moderne Informationsseite über das Tool.
-    Mobile-optimierte Version.
     """
-    st.header("🔍 Über SEO Wortanzahl-Analyse")
+    st.header("🔍 Über Wortanzahl-Analyse")
     st.markdown("""
     ### 📊 Moderne Dokumentenanalyse
 
-    Ein fortschrittliches Tool zur SEO-optimierten Textanalyse mit:
-    - 🚀 Drag & Drop Datei-Upload
+    Ein fortschrittliches Tool zur Analyse von Dokumenten mit:
+    - 🚀 Drag & Drop Unterstützung
     - 📊 Interaktiven Visualisierungen
-    - 🌐 Erweiterten Textmetriken
-    - 🔍 Semantischer Analyse
+    - 🌐 Google Drive Integration (in Entwicklung)
+    - 🔤 Detaillierten Wortstatistiken
 
     #### Technologien
     - Python
     - Streamlit
     - Plotly
-    - NLTK
     - WordCloud
     """)
 

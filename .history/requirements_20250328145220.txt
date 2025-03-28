@@ -1,0 +1,29 @@
+# Google Drive API
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+
+# Dokumentenverarbeitung
+python-docx
+
+# CLI und UI
+typer
+rich
+streamlit
+tkinter  # Für Datei- und Ordnerauswahl
+
+# Entwicklung und Testing
+pytest
+mypy
+black
+isort
+
+# Zusätzliche Hilfsbibliotheken
+python-dotenv
+pandas
+requests
+aiohttp
+httpx
+
+# Logging und Debugging
+loguru

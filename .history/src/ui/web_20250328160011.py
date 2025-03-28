@@ -1,7 +1,6 @@
 """
 Moderne Web-UI für das Wortanzahl-Tool mit Streamlit.
-Verbesserte Benutzerfreundlichkeit und SEO-Optimierung.
-Mobile-optimierte Version.
+Verbesserte Benutzerfreundlichkeit und SEO-Analyse-Funktionen.
 """
 import os
 import sys
@@ -19,48 +18,13 @@ from src.api.drive import GoogleDriveClient
 from src.core.word_counter import WordCounter
 from src.core.seo_analyzer import SEOAnalyzer
 
-# Mobile-optimierte Konfiguration
+# Globale Konfiguration
 st.set_page_config(
     page_title="📊 SEO Wortanzahl-Analyse",
     page_icon="📄",
-    layout="wide",  # Breites Layout für bessere Responsiveness
-    initial_sidebar_state="auto"  # Dynamische Seitenleiste
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
-
-# CSS für zusätzliche mobile Optimierung
-st.markdown("""
-<style>
-/* Mobile-freundliche Schriftgrößen */
-@media (max-width: 600px) {
-    .stMarkdown, .stMetric, .stButton > button {
-        font-size: 14px !important;
-    }
-    
-    /* Kompaktere Spalten */
-    .stColumns > div {
-        padding: 0.25rem !important;
-    }
-    
-    /* Anpassung für Diagramme */
-    .stPlotlyChart {
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-}
-
-/* Verbesserte Touch-Interaktion */
-.stFileUploader > div > div > div > input[type="file"] {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Responsive Tabellen */
-.stDataFrame {
-    overflow-x: auto;
-    max-width: 100%;
-}
-</style>
-""", unsafe_allow_html=True)
 
 def cache_result(func):
     """Decorator für Caching von Analyseergebnissen"""
@@ -148,7 +112,6 @@ def main():
 def local_file_analysis():
     """
     Moderne Analyse von lokalen DOCX-Dateien mit Drag & Drop.
-    Mobile-optimierte Version.
     """
     st.header("📤 Dokumente analysieren")
     
@@ -198,24 +161,23 @@ def google_drive_analysis():
 def seo_insights_page():
     """
     Detaillierte SEO-Insights und Erklärungen.
-    Mobile-optimierte Version.
     """
     st.header("🔍 SEO-Insights")
     
     st.markdown("""
     ### SEO-Metriken erklärt
     
-    #### 1. TF-IDF 
-    - Misst Wortrelevanz im Dokument
-    - Höhere Werte = Wichtigere Schlüsselwörter
+    #### 1. TF-IDF (Term Frequency-Inverse Document Frequency)
+    - Misst die Wichtigkeit eines Wortes in einem Dokument
+    - Höhere Werte = Relevantere Schlüsselwörter
     
     #### 2. Keyword-Dichte
-    - Prozentsatz spezifischer Keywords
-    - Optimierung für Suchmaschinen
+    - Prozentsatz der Vorkommen spezifischer Keywords
+    - Hilft bei der Optimierung von Suchmaschinenrelevanz
     
-    #### 3. Lesbarkeit
-    - Flesch Reading Ease
-    - Textverständlichkeit
+    #### 3. Lesbarkeitsindizes
+    - Flesch Reading Ease: Textverständlichkeit
+    - Flesch-Kincaid Grade: Bildungsniveau des Textes
     
     #### 4. Semantische Analyse
     - Identifiziert bedeutungsvolle Wörter
@@ -225,7 +187,6 @@ def seo_insights_page():
 def display_results(results: List[Dict[str, int]]):
     """
     Moderne Darstellung der Analyseergebnisse mit SEO-Metriken.
-    Mobile-optimierte Visualisierungen.
     
     Args:
         results: Liste der Analyseergebnisse
@@ -301,15 +262,14 @@ def display_results(results: List[Dict[str, int]]):
 def about_page():
     """
     Moderne Informationsseite über das Tool.
-    Mobile-optimierte Version.
     """
     st.header("🔍 Über SEO Wortanzahl-Analyse")
     st.markdown("""
-    ### 📊 Moderne Dokumentenanalyse
+    ### 📊 Moderne Dokumentenanalyse für Textagenturen
 
     Ein fortschrittliches Tool zur SEO-optimierten Textanalyse mit:
     - 🚀 Drag & Drop Datei-Upload
-    - 📊 Interaktiven Visualisierungen
+    - 📊 Interaktiven SEO-Visualisierungen
     - 🌐 Erweiterten Textmetriken
     - 🔍 Semantischer Analyse
 
