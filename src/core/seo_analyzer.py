@@ -3,19 +3,150 @@ SEO-Textanalyse-Modul für Wortanzahl-Tool.
 Erweiterte Metriken für Textagenturen und SEO-Optimierung.
 """
 import os
+import re
 import math
+import logging
 from typing import Dict, List, Any
 
-# NLTK-Konfiguration
+# NLTK-Konfiguration mit erweitertem Fallback-Mechanismus
 import nltk
-nltk.download('stopwords', quiet=True)
-nltk.download('punkt', quiet=True)
+
+# Definiere einen benutzerdefinierten NLTK-Datenordner
+nltk_data_path = os.path.join(os.path.dirname(__file__), '..', '..', 'nltk_data')
+os.makedirs(nltk_data_path, exist_ok=True)
+
+# Setze den NLTK-Datenordner
+nltk.data.path.append(nltk_data_path)
+
+# Logging-Konfiguration
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def download_nltk_resources(language: str = 'german'):
+    """
+    Lädt NLTK-Ressourcen sicher herunter mit Fallback-Mechanismus.
+    
+    Args:
+        language: Sprache für Ressourcen (default: deutsch)
+    """
+    resources = {
+        'german': ['punkt', 'stopwords'],
+        'english': ['punkt', 'stopwords', 'averaged_perceptron_tagger']
+    }
+    
+    try:
+        for resource in resources.get(language, resources['german']):
+            try:
+                nltk.download(resource, download_dir=nltk_data_path, quiet=True)
+            except Exception as e:
+                logger.warning(f"Fehler beim Download von {resource}: {e}")
+    except Exception as e:
+        logger.error(f"Unerwarteter Fehler bei NLTK-Ressourcen-Download: {e}")
+
+# Sichere NLTK-Ressourcen-Downloads
+download_nltk_resources()
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from textstat import flesch_reading_ease, flesch_kincaid_grade
 
 class SEOAnalyzer:
+    @staticmethod
+    def safe_tokenize(text: str, language: str = 'german') -> List[str]:
+        """
+        Sichere Tokenisierung mit mehreren Fallback-Mechanismen.
+        
+        Args:
+            text: Eingabetext
+            language: Sprache für Tokenisierung
+        
+        Returns:
+            Liste von Tokens
+        """
+        try:
+            # NLTK-Tokenisierung
+            tokens = word_tokenize(text.lower(), language=language)
+            return [token for token in tokens if token.isalnum()]
+        except Exception as e:
+            logger.warning(f"NLTK-Tokenisierung fehlgeschlagen: {e}")
+            
+            try:
+                # Reguläre Ausdrücke als Fallback
+                tokens = re.findall(r'\b\w+\b', text.lower())
+                return tokens
+            except Exception as fallback_error:
+                logger.error(f"Fallback-Tokenisierung fehlgeschlagen: {fallback_error}")
+                return text.lower().split()
+
+    @staticmethod
+    def get_stopwords(language: str = 'german') -> set:
+        """
+        Holt Stopwords für eine Sprache.
+        
+        Args:
+            language: Sprache der Stopwords
+        
+        Returns:
+            Menge von Stopwords
+        """
+        try:
+            return set(stopwords.words(language))
+        except Exception as e:
+            logger.warning(f"Stopwords-Fehler für {language}: {e}")
+            # Fallback-Stopwords
+            return {'der', 'die', 'das', 'und', 'oder', 'in', 'zu', 'ein', 'eine'}
+
+    @staticmethod
+    def readability_metrics(text: str) -> Dict[str, Any]:
+        """
+        Berechnet Lesbarkeitsmetriken.
+        
+        Args:
+            text: Vollständiger Text
+        
+        Returns:
+            Lesbarkeitsmetriken
+        """
+        try:
+            flesch_ease = flesch_reading_ease(text)
+            flesch_grade = flesch_kincaid_grade(text)
+            
+            return {
+                'flesch_reading_ease': flesch_ease,
+                'flesch_kincaid_grade': flesch_grade,
+                'complexity_level': SEOAnalyzer._get_complexity_level(flesch_ease)
+            }
+        except Exception as e:
+            logger.warning(f"Lesbarkeitsmetrik-Fehler: {e}")
+            return {
+                'flesch_reading_ease': 0,
+                'flesch_kincaid_grade': 0,
+                'complexity_level': 'Unbekannt'
+            }
+
+    @staticmethod
+    def _get_complexity_level(score: float) -> str:
+        """
+        Bestimmt Komplexitätslevel basierend auf Flesch-Reading-Ease-Score.
+        
+        Args:
+            score: Flesch-Reading-Ease-Score
+        
+        Returns:
+            Komplexitätslevel als Text
+        """
+        if score < 30:
+            return "Sehr schwierig"
+        elif 30 <= score < 50:
+            return "Schwierig"
+        elif 50 <= score < 60:
+            return "Etwas schwierig"
+        elif 60 <= score < 70:
+            return "Standard"
+        else:
+            return "Leicht verständlich"
+
+    # Weitere Methoden wie bisher
     @staticmethod
     def calculate_tf_idf(documents: List[str]) -> Dict[str, float]:
         """
@@ -29,7 +160,7 @@ class SEOAnalyzer:
         """
         # Tokenisierung und Vorverarbeitung
         def preprocess(text):
-            tokens = word_tokenize(text.lower())
+            tokens = SEOAnalyzer.safe_tokenize(text)
             return [token for token in tokens if token.isalnum()]
         
         # Vorverarbeitung der Dokumente
@@ -54,7 +185,7 @@ class SEOAnalyzer:
                 tf_idf_results[term] = tf * idf
         
         return dict(sorted(tf_idf_results.items(), key=lambda x: x[1], reverse=True))
-    
+
     @staticmethod
     def keyword_density(text: str, keywords: List[str]) -> Dict[str, float]:
         """
@@ -67,70 +198,40 @@ class SEOAnalyzer:
         Returns:
             Keyword-Dichte pro Keyword
         """
-        total_words = len(word_tokenize(text))
+        tokens = SEOAnalyzer.safe_tokenize(text)
+        total_words = len(tokens)
         keyword_counts = {keyword: text.lower().count(keyword.lower()) for keyword in keywords}
         
         return {
             keyword: (count / total_words) * 100 
             for keyword, count in keyword_counts.items()
         }
-    
+
     @staticmethod
-    def readability_metrics(text: str) -> Dict[str, Any]:
-        """
-        Berechnet Lesbarkeitsmetriken.
-        
-        Args:
-            text: Vollständiger Text
-        
-        Returns:
-            Lesbarkeitsmetriken
-        """
-        return {
-            'flesch_reading_ease': flesch_reading_ease(text),
-            'flesch_kincaid_grade': flesch_kincaid_grade(text),
-            'complexity_level': SEOAnalyzer._get_complexity_level(flesch_reading_ease(text))
-        }
-    
-    @staticmethod
-    def _get_complexity_level(score: float) -> str:
-        """
-        Bestimmt Komplexitätslevel basierend auf Flesch-Reading-Ease-Score.
-        
-        Args:
-            score: Flesch-Reading-Ease-Score
-        
-        Returns:
-            Komplexitätslevel als Text
-        """
-        if score < 30:
-            return "Sehr schwierig"
-        elif 30 <= score < 50:
-            return "Schwierig"
-        elif 50 <= score < 60:
-            return "Etwas schwierig"
-        elif 60 <= score < 70:
-            return "Standard"
-        else:
-            return "Leicht verständlich"
-    
-    @staticmethod
-    def semantic_analysis(text: str) -> Dict[str, Any]:
+    def semantic_analysis(text: str, language: str = 'german') -> Dict[str, Any]:
         """
         Führt eine einfache semantische Analyse durch.
         
         Args:
             text: Vollständiger Text
+            language: Sprache für Analyse
         
         Returns:
             Semantische Analyseresultate
         """
-        # Stopwords entfernen
-        stop_words = set(stopwords.words('german'))
-        tokens = word_tokenize(text.lower())
-        meaningful_words = [word for word in tokens if word.isalnum() and word not in stop_words]
-        
-        return {
-            'unique_meaningful_words': len(set(meaningful_words)),
-            'top_meaningful_words': nltk.FreqDist(meaningful_words).most_common(10)
-        }
+        try:
+            # Stopwords entfernen
+            stop_words = SEOAnalyzer.get_stopwords(language)
+            tokens = SEOAnalyzer.safe_tokenize(text, language)
+            meaningful_words = [word for word in tokens if word.isalnum() and word not in stop_words]
+            
+            return {
+                'unique_meaningful_words': len(set(meaningful_words)),
+                'top_meaningful_words': nltk.FreqDist(meaningful_words).most_common(10)
+            }
+        except Exception as e:
+            logger.warning(f"Semantische Analyse-Fehler: {e}")
+            return {
+                'unique_meaningful_words': 0,
+                'top_meaningful_words': []
+            }

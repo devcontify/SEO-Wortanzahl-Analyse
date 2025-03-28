@@ -95,11 +95,16 @@ def analyze_document(file_path: str) -> Dict[str, Any]:
             doc = docx.Document(file_path)
             full_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
             
-            # SEO-Metriken hinzufügen
-            result['tf_idf'] = SEOAnalyzer.calculate_tf_idf([full_text])
-            result['keyword_density'] = SEOAnalyzer.keyword_density(full_text, ['content', 'marketing', 'seo'])
-            result['readability'] = SEOAnalyzer.readability_metrics(full_text)
-            result['semantic_analysis'] = SEOAnalyzer.semantic_analysis(full_text)
+            # Minimale SEO-Metriken hinzufügen
+            try:
+                # Nur Lesbarkeitsmetriken - minimal invasiv
+                result['readability'] = SEOAnalyzer.readability_metrics(full_text)
+            except Exception as seo_error:
+                st.warning(f"SEO-Metriken konnten nicht berechnet werden: {seo_error}")
+                result['readability'] = {
+                    'flesch_reading_ease': 0,
+                    'complexity_level': 'Nicht verfügbar'
+                }
             
             return result
         except Exception as e:
@@ -132,7 +137,7 @@ def main():
     # Seitennavigation
     page = st.sidebar.radio(
         "Menü", 
-        ["Lokale Dateien", "Google Drive", "SEO-Insights", "Über"],
+        ["Lokale Dateien", "Google Drive", "Über"],
         index=0
     )
     
@@ -140,8 +145,6 @@ def main():
         local_file_analysis()
     elif page == "Google Drive":
         google_drive_analysis()
-    elif page == "SEO-Insights":
-        seo_insights_page()
     else:
         about_page()
 
@@ -195,36 +198,9 @@ def google_drive_analysis():
     st.header("🌐 Google Drive Dokumente")
     st.warning("Google Drive Integration wird noch entwickelt.")
 
-def seo_insights_page():
-    """
-    Detaillierte SEO-Insights und Erklärungen.
-    Mobile-optimierte Version.
-    """
-    st.header("🔍 SEO-Insights")
-    
-    st.markdown("""
-    ### SEO-Metriken erklärt
-    
-    #### 1. TF-IDF 
-    - Misst Wortrelevanz im Dokument
-    - Höhere Werte = Wichtigere Schlüsselwörter
-    
-    #### 2. Keyword-Dichte
-    - Prozentsatz spezifischer Keywords
-    - Optimierung für Suchmaschinen
-    
-    #### 3. Lesbarkeit
-    - Flesch Reading Ease
-    - Textverständlichkeit
-    
-    #### 4. Semantische Analyse
-    - Identifiziert bedeutungsvolle Wörter
-    - Zeigt thematische Schwerpunkte
-    """)
-
 def display_results(results: List[Dict[str, int]]):
     """
-    Moderne Darstellung der Analyseergebnisse mit SEO-Metriken.
+    Moderne Darstellung der Analyseergebnisse mit minimalen SEO-Metriken.
     Mobile-optimierte Visualisierungen.
     
     Args:
@@ -250,6 +226,12 @@ def display_results(results: List[Dict[str, int]]):
             with col1:
                 st.metric("Wörter", result.get('total_words', 0))
                 st.metric("Einzigartige Wörter", result.get('unique_words', 0))
+                
+                # Minimale SEO-Metriken
+                readability = result.get('readability', {})
+                if readability and readability.get('flesch_reading_ease', 0) > 0:
+                    st.metric("Lesbarkeit", f"{readability.get('flesch_reading_ease', 0):.2f}")
+                    st.metric("Komplexitätslevel", readability.get('complexity_level', 'Unbekannt'))
             
             with col2:
                 # Top 10 Wörter
@@ -268,32 +250,6 @@ def display_results(results: List[Dict[str, int]]):
                 )
                 st.plotly_chart(fig, use_container_width=True)
             
-            # SEO-Metriken
-            st.subheader("🔍 SEO-Metriken")
-            
-            # TF-IDF
-            st.write("#### TF-IDF Top 5")
-            tf_idf = result.get('tf_idf', {})
-            tf_idf_df = pd.DataFrame.from_dict(dict(list(tf_idf.items())[:5]), orient='index', columns=['TF-IDF'])
-            st.dataframe(tf_idf_df)
-            
-            # Keyword-Dichte
-            st.write("#### Keyword-Dichte")
-            keyword_density = result.get('keyword_density', {})
-            keyword_df = pd.DataFrame.from_dict(keyword_density, orient='index', columns=['Dichte %'])
-            st.dataframe(keyword_df)
-            
-            # Lesbarkeit
-            st.write("#### Lesbarkeit")
-            readability = result.get('readability', {})
-            st.metric("Flesch Reading Ease", f"{readability.get('flesch_reading_ease', 0):.2f}")
-            st.metric("Komplexitätslevel", readability.get('complexity_level', 'Unbekannt'))
-            
-            # Semantische Analyse
-            st.write("#### Semantische Analyse")
-            semantic = result.get('semantic_analysis', {})
-            st.metric("Bedeutungsvolle Wörter", semantic.get('unique_meaningful_words', 0))
-            
             # Wortwolke
             st.subheader("Wortwolke")
             display_word_cloud(result.get('word_frequency', {}))
@@ -306,18 +262,17 @@ def about_page():
     st.header("🔍 Über SEO Wortanzahl-Analyse")
     st.markdown("""
     ### 📊 Moderne Dokumentenanalyse
-
-    Ein fortschrittliches Tool zur SEO-optimierten Textanalyse mit:
+    
+    Ein Tool zur Textanalyse mit:
     - 🚀 Drag & Drop Datei-Upload
     - 📊 Interaktiven Visualisierungen
-    - 🌐 Erweiterten Textmetriken
-    - 🔍 Semantischer Analyse
-
+    - 📝 Wortanzahl und Häufigkeitsanalyse
+    - 📖 Grundlegende Lesbarkeitsmetriken
+    
     #### Technologien
     - Python
     - Streamlit
     - Plotly
-    - NLTK
     - WordCloud
     """)
 
