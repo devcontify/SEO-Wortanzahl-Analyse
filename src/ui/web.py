@@ -1,12 +1,39 @@
 """
 Web-UI für das Wortanzahl-Tool mit Streamlit.
 """
-import streamlit as st
 import os
-from typing import List, Dict
+import streamlit as st
+import tkinter as tk
+from tkinter import filedialog
+from typing import List, Dict, Optional
 
 from src.api.drive import GoogleDriveClient
 from src.core.word_counter import WordCounter
+
+def open_file_dialog(select_type: str = 'file') -> Optional[str]:
+    """
+    Öffnet einen Datei- oder Ordnerauswahldialog.
+    
+    Args:
+        select_type: 'file' für Dateiauswahl, 'folder' für Ordnerauswahl
+    
+    Returns:
+        Ausgewählter Pfad oder None
+    """
+    root = tk.Tk()
+    root.withdraw()  # Verstecke das Hauptfenster
+    
+    if select_type == 'file':
+        path = filedialog.askopenfilename(
+            title="DOCX-Datei auswählen",
+            filetypes=[("Word Dokumente", "*.docx")]
+        )
+    else:
+        path = filedialog.askdirectory(
+            title="Ordner mit DOCX-Dokumenten auswählen"
+        )
+    
+    return path if path else None
 
 def main():
     """
@@ -33,34 +60,46 @@ def local_file_analysis():
     """
     st.header("Lokale DOCX-Dateien analysieren")
     
-    uploaded_files = st.file_uploader(
-        "Laden Sie DOCX-Dateien hoch", 
-        type=['docx'], 
-        accept_multiple_files=True
+    # Auswahl zwischen Einzeldatei und Ordner
+    selection_type = st.radio(
+        "Wählen Sie den Typ der Auswahl:", 
+        ["Einzelne Datei", "Ordner"]
     )
     
-    if uploaded_files:
-        results = []
-        for uploaded_file in uploaded_files:
-            # Temporäre Datei speichern
-            with open(uploaded_file.name, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            
-            try:
-                result = WordCounter.count_words(uploaded_file.name)
-                result['file'] = uploaded_file.name
-                results.append(result)
-                
-                # Temporäre Datei löschen
-                os.remove(uploaded_file.name)
-            except Exception as e:
-                st.error(f"Fehler bei {uploaded_file.name}: {e}")
+    # Dateiauswahl-Button
+    if st.button("Dateien/Ordner auswählen"):
+        if selection_type == "Einzelne Datei":
+            selected_path = open_file_dialog('file')
+            file_paths = [selected_path] if selected_path else []
+        else:
+            selected_path = open_file_dialog('folder')
+            if selected_path:
+                # Alle DOCX-Dateien im Ordner finden
+                file_paths = [
+                    os.path.join(selected_path, f) 
+                    for f in os.listdir(selected_path) 
+                    if f.endswith('.docx')
+                ]
+            else:
+                file_paths = []
         
-        display_results(results)
+        if file_paths:
+            results = []
+            for path in file_paths:
+                try:
+                    result = WordCounter.count_words(path)
+                    result['file'] = os.path.basename(path)
+                    results.append(result)
+                except Exception as e:
+                    st.error(f"Fehler bei {path}: {e}")
+            
+            display_results(results)
+        else:
+            st.warning("Keine Dateien ausgewählt.")
 
 def google_drive_analysis():
     """
-    Analyse von Google Drive DOCX-Dateien.
+    Analyse von Google Drive DOCX-Dokumenten.
     """
     st.header("Google Drive Dokumente analysieren")
     

@@ -10,6 +10,7 @@ python-docx
 typer
 rich
 streamlit
+tkinter  # Für Datei- und Ordnerauswahl
 
 # Entwicklung und Testing
 pytest
