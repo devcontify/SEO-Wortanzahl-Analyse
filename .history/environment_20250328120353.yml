@@ -1,0 +1,21 @@
+name: word-counter
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  python=3.11
+  pip
+  google-api-python-client
+  google-auth-httplib2
+  google-auth-oauthlib
+  python-docx
+  typer
+  rich
+  streamlit
+  fastapi
+  uvicorn
+  python-dotenv
+  pandas
+  requests
+  aiohttp
+  httpx

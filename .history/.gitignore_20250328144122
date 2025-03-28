@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Conda
+.conda/
+*.conda
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Credentials und Token
+credentials.json
+token.pickle
+
+# Logs
+*.log
+logs/
+
+# Temporäre Dateien
+*.tmp
+*.bak
+*.swp
+.DS_Store
+
+# Heruntergeladene Dokumente
+downloads/
+
+# Testing und Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Streamlit
+.streamlit/
+
+# Weitere Python-spezifische Ignorierungen
+.mypy_cache/
+.dmypy.json
+dmypy.json
