@@ -5,7 +5,6 @@ __pycache__/
 
 # History and Temporary Files
 .history/
-.temp/
 temp/
 *.tmp
 *.log
