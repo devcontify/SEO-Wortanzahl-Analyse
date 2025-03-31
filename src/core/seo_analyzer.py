@@ -146,7 +146,6 @@ class SEOAnalyzer:
         else:
             return "Leicht verständlich"
 
-    # Weitere Methoden wie bisher
     @staticmethod
     def calculate_tf_idf(documents: List[str]) -> Dict[str, float]:
         """
@@ -185,6 +184,46 @@ class SEOAnalyzer:
                 tf_idf_results[term] = tf * idf
         
         return dict(sorted(tf_idf_results.items(), key=lambda x: x[1], reverse=True))
+
+    @staticmethod
+    def calculate_wdf_idf(documents: List[str]) -> Dict[str, float]:
+        """
+        Berechnet WDF-IDF (Within Document Frequency - Inverse Document Frequency) für Dokumente.
+        
+        Args:
+            documents: Liste von Textdokumenten
+        
+        Returns:
+            WDF-IDF Werte für Wörter
+        """
+        # Tokenisierung und Vorverarbeitung
+        def preprocess(text):
+            tokens = SEOAnalyzer.safe_tokenize(text)
+            return [token for token in tokens if token.isalnum()]
+        
+        # Vorverarbeitung der Dokumente
+        processed_docs = [preprocess(doc) for doc in documents]
+        
+        # Within Document Frequency (WDF) - logarithmische Skalierung
+        def within_document_frequency(doc, term):
+            term_count = doc.count(term)
+            return math.log(1 + term_count) if term_count > 0 else 0
+        
+        # Dokumentenfrequenz
+        def document_frequency(term):
+            return sum(1 for doc in processed_docs if term in doc)
+        
+        # WDF-IDF Berechnung
+        wdf_idf_results = {}
+        total_docs = len(processed_docs)
+        
+        for doc in processed_docs:
+            for term in set(doc):
+                wdf = within_document_frequency(doc, term)
+                idf = math.log(total_docs / (document_frequency(term) + 1))
+                wdf_idf_results[term] = wdf * idf
+        
+        return dict(sorted(wdf_idf_results.items(), key=lambda x: x[1], reverse=True))
 
     @staticmethod
     def keyword_density(text: str, keywords: List[str]) -> Dict[str, float]:
