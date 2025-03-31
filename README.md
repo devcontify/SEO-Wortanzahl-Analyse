@@ -1,68 +1,44 @@
-# 📊 SEO Wortanzahl-Analyse Tool
+# SEO Wortanzahl-Analyse Tool
 
-## 🚀 Projektübersicht
-Ein fortschrittliches Tool zur SEO-optimierten Textanalyse für Textagenturen, entwickelt von Contify.
+## Projektbeschreibung
+Ein modernes Werkzeug zur Dokumentenanalyse mit erweiterten SEO-Metriken, entwickelt mit Python und Streamlit.
 
-### 🔍 Hauptfunktionen
-- Drag & Drop Datei-Upload für DOCX-Dokumente
-- Erweiterte SEO-Metriken
-- Interaktive Datenvisualisierungen
-- Lesbarkeits- und Komplexitätsanalyse
+## Funktionen
+- 📤 Drag & Drop Datei-Upload
+- 📊 Interaktive Visualisierungen
+- 📝 Wortanzahl und Häufigkeitsanalyse
+- 📖 Erweiterte Lesbarkeitsmetriken
+- 🔍 SEO-Analysetools
 
-## 💡 Technologien
+## Technologien
 - Python
 - Streamlit
-- NLTK
 - Plotly
-- WordCloud
+- NLTK
+- ReportLab
 
-## 📈 SEO-Metriken
-1. **TF-IDF (Term Frequency-Inverse Document Frequency)**
-   - Misst die Wichtigkeit von Wörtern
-   - Identifiziert Schlüsselwörter
+## Deployment
+Das Projekt ist für Vercel optimiert und kann einfach deployed werden.
 
-2. **Keyword-Dichte**
-   - Prozentuale Verteilung von Keywords
-   - Optimierung für Suchmaschinenrelevanz
+### Voraussetzungen
+- Python 3.11
+- Conda-Umgebung
+- Installierte Abhängigkeiten aus `requirements.txt`
 
-3. **Lesbarkeitsindizes**
-   - Flesch Reading Ease
-   - Flesch-Kincaid Grade Level
-   - Komplexitätsbewertung
-
-4. **Semantische Analyse**
-   - Identifiziert bedeutungsvolle Wörter
-   - Zeigt thematische Schwerpunkte
-
-## 🛠 Installation
+### Lokale Entwicklung
 ```bash
-# Virtuelle Umgebung erstellen
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# Conda-Umgebung aktivieren
+conda activate word-counter
 
 # Abhängigkeiten installieren
 pip install -r requirements.txt
 
-# NLTK-Daten herunterladen
-python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
-```
-
-## 🚀 Anwendung starten
-```bash
+# Streamlit starten
 streamlit run src/ui/web.py
 ```
 
-## 📋 Verwendung
-1. DOCX-Dokumente hochladen
-2. Analyseergebnisse einsehen
-3. SEO-Optimierungspotenziale identifizieren
+## Lizenz
+[Ihre Lizenzinformationen hier]
 
-## 🤝 Beitrag
-Vorschläge und Verbesserungen sind willkommen!
-
-## 📄 Lizenz
-[Ihre Lizenzinformationen]
-
----
-
-Entwickelt von Contify - Intelligente Textlösungen 🖋️
+## Autoren
+[Ihre Autorenliste]
