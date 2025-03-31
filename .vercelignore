@@ -1,0 +1,10 @@
+venv
+*.pyc
+__pycache__
+.conda
+nltk_data
+temp
+test_documents
+seo_analysis_results
+.git
+.gitignore
