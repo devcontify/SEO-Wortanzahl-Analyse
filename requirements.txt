@@ -10,6 +10,6 @@ google-auth-httplib2==0.2.0
 google-api-python-client==2.108.0
 nltk==3.8
 textstat==0.7.3
-regex==2024.1.16
+regex
 reportlab==4.0.8
 lxml==5.2.1
