@@ -1,0 +1,24 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "src/ui/web.py",
+            "use": "@vercel/python",
+            "config": {
+                "runtime": "python3.11",
+                "maxLambdaSize": "15mb",
+                "buildCommand": "pip install -r requirements.txt",
+                "startCommand": "streamlit run src/ui/web.py"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "src/ui/web.py"
+        }
+    ],
+    "env": {
+        "PYTHONPATH": "."
+    }
+}
