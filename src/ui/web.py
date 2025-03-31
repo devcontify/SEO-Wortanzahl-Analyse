@@ -13,8 +13,8 @@ def main():
     st.title("📊 SEO Wortanzahl-Analyse")
     
     uploaded_files = st.file_uploader(
-        "Laden Sie DOCX-Dateien hoch", 
-        type=['docx'], 
+        "Laden Sie DOCX-Dateien hoch (max. 10MB)",
+        type=['docx'],
         accept_multiple_files=True
     )
     
