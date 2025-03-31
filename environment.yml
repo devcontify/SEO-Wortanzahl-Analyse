@@ -5,17 +5,6 @@ channels:
 dependencies:
   - python==3.11
   - pip
-  - google-api-python-client
-  - google-auth-httplib2
-  - google-auth-oauthlib
-  - python-docx
-  - typer
-  - rich
   - streamlit
-  - fastapi
-  - uvicorn
-  - python-dotenv
+  - nltk
   - pandas
-  - requests
-  - aiohttp
-  - httpx
