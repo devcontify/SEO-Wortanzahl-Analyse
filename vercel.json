@@ -8,7 +8,8 @@
                 "runtime": "python3.11",
                 "maxLambdaSize": "15mb",
                 "buildCommand": "pip install -r requirements.txt",
-                "startCommand": "streamlit run src/ui/web.py"
+                "startCommand": "streamlit run src/ui/web.py --server.port $PORT --server.address 0.0.0.0",
+                "excludes": [".git", "__pycache__", "*.pyc"]
             }
         }
     ],
@@ -20,6 +21,6 @@
     ],
     "env": {
         "PYTHONPATH": ".",
-        "VERCEL_TOKEN": "@vercel-token"
+        "PORT": "3000"
     }
 }
