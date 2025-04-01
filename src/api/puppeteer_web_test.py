@@ -2,9 +2,9 @@ import asyncio
 import os
 from pyppeteer import launch
 
-async def test_seo_analysis_app():
+async def login_to_claude(email: str, password: str):
     """
-    Automatisierter Test der SEO-Analyse-Webanwendung mit Puppeteer
+    Automatisierte Anmeldung bei Claude
     """
     browser = await launch(headless=False)
     page = await browser.newPage()
@@ -12,53 +12,31 @@ async def test_seo_analysis_app():
     # Setze Viewport-Größe
     await page.setViewport({'width': 1920, 'height': 1080})
     
-    # Starte Streamlit-Anwendung
-    await page.goto('http://localhost:8501')
-    await page.waitForSelector('input[type="file"]')
+    # Navigiere zur Claude-Anmeldeseite
+    await page.goto('https://claude.ai/chat/ec32fd23-baed-4374-8487-3e16fc96b0e8')
     
-    # Testdateien-Verzeichnis
-    test_files_dir = r'K:\Meine Ablage\Empirio'
+    # Warte auf die Eingabefelder für die Anmeldung
+    await page.waitForSelector('input[name="email"]')
+    await page.waitForSelector('input[name="password"]')
     
-    # Dokumente hochladen
-    file_input = await page.querySelector('input[type="file"]')
-    test_files = [
-        os.path.join(test_files_dir, 'literature_research_kor.docx'),
-        os.path.join(test_files_dir, 'hypotheses_kor.docx')
-    ]
+    # Fülle die Anmeldedaten aus
+    await page.type('input[name="email"]', email)
+    await page.type('input[name="password"]', password)
     
-    await file_input.uploadFile(*test_files)
+    # Klicke auf den Anmeldebutton
+    await page.click('button[type="submit"]')
     
-    # Warte auf Analyse
-    await page.waitForSelector('div[data-testid="stMetric"]', timeout=30000)
+    # Warte auf die Navigation nach der Anmeldung
+    await page.waitForNavigation()
     
-    # Screenshots machen
-    screenshots_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'test_screenshots')
-    os.makedirs(screenshots_dir, exist_ok=True)
-    
-    # Gesamtansicht
-    await page.screenshot({'path': os.path.join(screenshots_dir, 'seo_analysis_overview.png')})
-    
-    # Export-Optionen testen
-    await page.click('div[role="radiogroup"] label:nth-child(2)')  # PDF-Option
-    await page.click('button:has-text("Ergebnisse exportieren")')
-    
-    # Warte auf Download-Button
-    await page.waitForSelector('a[download]')
-    
-    # Screenshot der Export-Optionen
-    await page.screenshot({'path': os.path.join(screenshots_dir, 'seo_analysis_export.png')})
-    
-    # Detaillierte Ergebnisse
-    await page.screenshot({'path': os.path.join(screenshots_dir, 'seo_analysis_details.png')})
+    # Hier können weitere Schritte zur Interaktion mit der Seite hinzugefügt werden
     
     await browser.close()
 
 async def main():
-    try:
-        await test_seo_analysis_app()
-        print("SEO-Analyse-App Test erfolgreich abgeschlossen.")
-    except Exception as e:
-        print(f"Fehler beim Testen der SEO-Analyse-App: {e}")
+    email = "your_email@example.com"  # Ersetzen Sie dies durch die tatsächliche E-Mail
+    password = "your_password"          # Ersetzen Sie dies durch das tatsächliche Passwort
+    await login_to_claude(email, password)
 
 if __name__ == '__main__':
     asyncio.get_event_loop().run_until_complete(main())
